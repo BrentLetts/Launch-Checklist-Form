@@ -51,3 +51,11 @@ button {
     height: 30px;
     margin: 10px 0;
 }
+
+.flex-items{
+    display:flex; 
+    flex-direction: row; 
+    justify-content: center; 
+    align-items: center; 
+    margin: 8 0;
+}
