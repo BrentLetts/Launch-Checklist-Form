@@ -25,8 +25,45 @@ let cargoStatus = null;
 let faultyItems = null;
 let launchStatusCheck = null;
 
+
 const launchStatusReset = document.getElementById('launchStatus');
 window.addEventListener("load", function(){
+   let json = [];
+   fetch("https://handlers.education.launchcode.org/static/planets.json").then(function(response){
+      response.json().then(function(json){
+         const missionTarget = document.getElementById("missionTarget");
+
+         //counter for the click event cycle
+         let index = 0;
+         loadJson(json[index]);
+         //add the click event
+         missionTarget.addEventListener("click", function(){
+            //since this is loading on the initial, increment the index first
+            index = (index + 1) % json.length;
+            loadJson(json[index]);
+            
+         });
+         
+      });
+   });
+
+   function loadJson(j){
+      // alert("loading JSON")
+      missionTarget.innerHTML = `<h2>Mission Destination</h2>
+            <ol>
+               <li id="planetName">Name: ${j.name}</li>
+               <li>Diameter: ${j.diameter}</li>
+               <li>Star: ${j.star}</li>
+               <li>Distance from Earth: ${j.distance}</li>
+               <li>Number of Moons: ${j.moons}</li>
+            </ol>
+            <img src="${j.image}">
+            <p>Click the image for more options</p>`;
+            
+            //increment the index
+            
+   }
+
    let form = document.querySelector("form");
    form.addEventListener("submit", function(event){
       pilotName = document.querySelector("input[name=pilotName]");
@@ -45,6 +82,9 @@ window.addEventListener("load", function(){
       
       //regex for the string validation
       let reg = "[a-zA-Z]"
+
+      //variable to assign the popup alert
+      let popupText = "";
       
       validateForm();
       
@@ -61,6 +101,9 @@ window.addEventListener("load", function(){
             isFuelReady && isCargoReady);
         
          if(!isValid){
+            if(popupText !== ""){
+               alert(popupText);
+            }
             launchStatus.innerHTML = "Shuttle not ready for launch";
             launchStatus.style.color = "red";
             event.preventDefault();
@@ -68,7 +111,7 @@ window.addEventListener("load", function(){
             
          }else{
             launchStatus.innerHTML = "Shuttle is ready for launch";
-            launchStatus.style.color = "black";
+            launchStatus.style.color = "green";
             faultyItems.style.visibility = "visible";
             event.preventDefault();
          }
@@ -76,6 +119,7 @@ window.addEventListener("load", function(){
 
       function checkPilotStatus(){
          if(pilotName.value === ""){
+            popup = "All fields required";
             pilotStatus.innerHTML = "Pilot name cannot be empty";
             isValid = false;
          }else if(!pilotName.value.match(reg)){
@@ -98,6 +142,7 @@ window.addEventListener("load", function(){
       
       function checkCopilotStatus(){
          if(copilotName.value === ""){
+            popupText = "All fields required";
             copilotStatus.innerHTML = "Co-pilot name cannot be empty";
             isValid = false;
          }else if(!copilotName.value.match(reg)){
@@ -119,10 +164,11 @@ window.addEventListener("load", function(){
       
       function checkFuelLevel(){
          if(fuelLevel.value === ""){
+            popupText = "All fields required";
             fuelStatus.innerHTML = "Please enter a fuel status";
             isValid = false;
          }else if(fuelLevel.value < 10000){
-            fuelStatus.innerHTML = "Not enough fuel for the journey";
+            fuelStatus.innerHTML = `Fuel required to reach "${document.getElementById('planetName').innerHTML}" needs to be higher than 10,000`;
             isValid = false;
          }else{
             fuelStatus.innerHTML = "Fuel level high enough for launch";
@@ -139,10 +185,13 @@ window.addEventListener("load", function(){
       
       function checkCargoMass(){
          if(cargoMass.value === ""){
+            popupText = "All fields required";
             cargoStatus.innerHTML = "Please enter the cargo mass";
             isValid = false;
          }else if(cargoMass.value > 10000){
-            cargoStatus.innerHTML = "Cargo Mass is too high for launch";
+            cargoStatus.innerHTML = 
+            `Mass needs to be lower than 10,000 to reach "${document.getElementById('planetName').innerHTML}"`;
+            // "";
             isValid = false;
          }else{
             cargoStatus.innerHTML = "Cargo mass low enough for launch";
