@@ -25,6 +25,7 @@ let cargoStatus = null;
 let faultyItems = null;
 let launchStatusCheck = null;
 
+const launchStatusReset = document.getElementById('launchStatus');
 window.addEventListener("load", function(){
    let form = document.querySelector("form");
    form.addEventListener("submit", function(event){
@@ -40,92 +41,121 @@ window.addEventListener("load", function(){
       faultyItems = document.getElementById('faultyItems');
       launchStatusCheck = document.getElementById('launchStatusCheck');
 
+      let isValid = false;
+      
+      //regex for the string validation
+      let reg = "[a-zA-Z]"
       
       validateForm();
       
       function validateForm(){
-         //regex for the string validation
-         let reg = "[a-zA-Z]"
          
-         if(pilotName.value === "" ||
-         copilotName.value === "" || 
-         fuelLevel.value === "" || 
-         cargoMass.value === ""){
-            alert('All fields are required');
-            event.preventDefault();
-         }else if(!pilotName.value.match(reg)){
-            alert("Pilot name is incorrect format");
-            event.preventDefault();
-            pilotName.value = "";
-            pilotName.focus();
-         }else if(!copilotName.value.match(reg)){
-            alert("Copilot Name is incorrect format");
-            event.preventDefault();
-            copilotName.value = "";
-            copilotName.focus();
-         }
-      }
-
-      //TODO: NEED TO MAKE THE FUNCTIONALITY WORK FOR THE VALIDATION
-      //EITHER USE WHAT WORKS ABOVE OR TRY THE BELOW TO GET IT WORKING
-
-      let isValid = null;
-      function checkStatus(){
-         // if(!pilotName.value.match(reg)){
-         //    pilotName.value = "";
-         //    // pilotName.focus();
-         //    pilotStatus.style.color = "red";
-         //    isValid = false;
-         //    pilotStatus.innerHTML = `${pilotName.value}  ${pilotStatus.innerHTML}`;
-         // }
-         // checkPilotStatus();
-         // checkCopilotStatus();
-         checkFuelLevel();
-         checkCargoMass();
+         isValid = true;
+         
+         let isPilotReady = checkPilotStatus();
+         let isCoReady = checkCopilotStatus();
+         let isFuelReady = checkFuelLevel();
+         let isCargoReady = checkCargoMass();
+         
+         isValid = (isPilotReady && isCoReady &&
+            isFuelReady && isCargoReady);
+        
          if(!isValid){
             launchStatus.innerHTML = "Shuttle not ready for launch";
             launchStatus.style.color = "red";
             event.preventDefault();
             faultyItems.style.visibility = "visible";
+            
+         }else{
+            launchStatus.innerHTML = "Shuttle is ready for launch";
+            launchStatus.style.color = "black";
+            faultyItems.style.visibility = "visible";
+            event.preventDefault();
          }
-         
       }
 
       function checkPilotStatus(){
-         if(!pilotName.value.match(reg)){
-            pilotName.value = "";
-            // pilotName.focus();
-            pilotStatus.style.color = "red";
+         if(pilotName.value === ""){
+            pilotStatus.innerHTML = "Pilot name cannot be empty";
             isValid = false;
-            pilotStatus.innerHTML = `${pilotName.value}  ${pilotStatus.innerHTML}`;
+         }else if(!pilotName.value.match(reg)){
+            pilotStatus.innerHTML = "is not a valid format"
+            isValid = false;
+            
+         }else{
+            pilotStatus.innerHTML = "is Ready";
+            pilotStatus.style.color = "black";
+            isValid = true;
+         }
+
+         if(!isValid){
+            pilotStatus.style.color = "red";
+         }
+
+         pilotStatus.innerHTML = `${pilotName.value}  ${pilotStatus.innerHTML}`;
+         return isValid;
+      }
+      
+      function checkCopilotStatus(){
+         if(copilotName.value === ""){
+            copilotStatus.innerHTML = "Co-pilot name cannot be empty";
+            isValid = false;
+         }else if(!copilotName.value.match(reg)){
+            copilotStatus.innerHTML = "Co-pilot not a valid format";
+            isValid = false;
+         }else{
+            copilotStatus.innerHTML = "is Ready";
+            copilotStatus.style.color = "black";
+            isValid = true;
          }
          
-      }
-
-      function checkCopilotStatus(){
-         if(!copilotName.value.match(reg)){
-            copilotName.value = "";
-            // copilotName.focus();
+         if(!isValid){
             copilotStatus.style.color = "red";
-            isValid = false;
          }
+
          copilotStatus.innerHTML = `${copilotName.value}  ${copilotStatus.innerHTML}`;
+         return isValid;
       }
-
+      
       function checkFuelLevel(){
-         if(fuelLevel.value < 10000){
+         if(fuelLevel.value === ""){
+            fuelStatus.innerHTML = "Please enter a fuel status";
+            isValid = false;
+         }else if(fuelLevel.value < 10000){
             fuelStatus.innerHTML = "Not enough fuel for the journey";
-            fuelStatus.style.color = "red";
             isValid = false;
+         }else{
+            fuelStatus.innerHTML = "Fuel level high enough for launch";
+            fuelStatus.style.color = "black";
+            isValid = true;
          }
-      }
 
-      function checkCargoMass(){
-         if(cargoMass.value > 10000){
-            cargoStatus.innerHTML = "Cargo Mass is too high for launch";
-            cargoStatus.style.color = "red";
-            isValid = false;
+         if(!isValid){
+            fuelStatus.style.color = "red";
          }
+         
+         return isValid;
       }
+      
+      function checkCargoMass(){
+         if(cargoMass.value === ""){
+            cargoStatus.innerHTML = "Please enter the cargo mass";
+            isValid = false;
+         }else if(cargoMass.value > 10000){
+            cargoStatus.innerHTML = "Cargo Mass is too high for launch";
+            isValid = false;
+         }else{
+            cargoStatus.innerHTML = "Cargo mass low enough for launch";
+            cargoStatus.style.color = "black";
+            isValid = true;
+         }
+
+         if(!isValid){
+            cargoStatus.style.color = "red";
+         }
+         return isValid;
+      }
+      
    });
 });
+
